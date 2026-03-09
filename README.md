@@ -4,13 +4,11 @@ A command-line calculator built in C++.
 Reads mathematical expressions from input files and writes results to output files.
 
 ## Features
-- Addition, subtraction, multiplication, division, power
+- Addition, subtraction, multiplication, division, exponentiation
 - Variables
 - Base conversion (e.g. decimal to binary)
 
 ## Compilation
-
-### Visual Studio
 
 ### g++
 ```bash
