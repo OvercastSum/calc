@@ -1,6 +1,6 @@
 /**
  * @file main.cpp
- * @brief Główny plik programu
+ * @brief Main program file
  * @author Karol Radziszewski
  * @date 2026
  */
@@ -13,17 +13,19 @@
 #include "file_handling.h"
 #include "data_processing.h"
 
-/**
- * @brief Główny punkt wejścia do programu (entry point).
- * * Funkcja pełni rolę koordynatora, integrując moduły obsługi wiersza poleceń,
- * operacji na plikach oraz silnika obliczeniowego.
- * Steruje przepływem danych: pobiera argumenty, wczytuje równania,
- * przetwarza je sekwencyjnie (zachowując stan zmiennych między liniami)
- * i zapisuje wyniki. Zawiera również globalny blok try-catch do obsługi błędów.
- * * @param argc Liczba argumentów wywołania programu.
- * @param argv Tablica wskaźników na argumenty (ciągi znaków).
- * @return int Kod zakończenia programu: 0 w przypadku sukcesu, 1 w przypadku wystąpienia błędu.
- */
+ /**
+  * @brief Main entry point of the program.
+  *
+  * Acts as a coordinator, integrating the command-line handling,
+  * file operations, and calculation engine modules.
+  * Controls the data flow: parses arguments, reads equations,
+  * processes them sequentially (preserving variable state between lines)
+  * and writes the results. Also contains a global try-catch block for error handling.
+  *
+  * @param argc Number of command-line arguments.
+  * @param argv Array of pointers to argument strings.
+  * @return int Exit code: 0 on success, 1 on error.
+  */
 int main(int argc, char *argv[])
 {
 	auto args = parseCommand(argc, argv);

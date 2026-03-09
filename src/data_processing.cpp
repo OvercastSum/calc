@@ -1,7 +1,7 @@
 /**
  * @file data_processing.cpp
- * @brief Główny plik obliczeniowy (implementacja logiki matematycznej).
- * */
+ * @brief Main calculation file (implementation of mathematical logic).
+ */
 
 #include <iostream>
 #include <vector>
@@ -17,15 +17,18 @@
 #include <cmath>
 #include <string.h>
 
-// Tokenize
-/**
- * @brief Rozbija ciąg znaków na pojedyncze tokeny matematyczne.
- * * Dzieli tekst na liczby, operatory i zmienne. Dodatkowo wykrywa i obsługuje
- * "minus unarny" (np. w wyrażeniu "-5"), łącząc go z liczbą, zamiast traktować jako odejmowanie.
- * * @param input Surowy tekst równania.
- * @return std::vector<std::string> Lista tokenów gotowa do dalszego przetwarzania.
- */
-std::vector<std::string> tokenize(const std::string &input)
+ // Tokenize
+ /**
+  * @brief Splits a string into individual mathematical tokens.
+  *
+  * Divides the text into numbers, operators, and variables. Also detects and handles
+  * the "unary minus" (e.g. in the expression "-5"), merging it with the number
+  * instead of treating it as subtraction.
+  *
+  * @param input Raw equation text.
+  * @return std::vector<std::string> List of tokens ready for further processing.
+  */
+std::vector<std::string> tokenize(const std::string& input)
 {
 	std::vector<std::string> result;
 	std::regex pattern("([+\\-*/^()=])|([^\\s+\\-*/^()=]+)");
@@ -38,7 +41,7 @@ std::vector<std::string> tokenize(const std::string &input)
 		result.push_back(match->str());
 	}
 
-	std::set<std::string> operators = {"+", "-", "*", "/", "^", "(", ")", "="};
+	std::set<std::string> operators = { "+", "-", "*", "/", "^", "(", ")", "=" };
 	std::regex numbers("([0-9A-Z]+)|(\\$M[0-9]+)");
 
 	for (int i = result.size() - 1; i >= 0; --i)
@@ -61,16 +64,18 @@ std::vector<std::string> tokenize(const std::string &input)
 
 // Validation
 /**
- * @brief Sprawdza, czy operatory są poprawnie rozmieszczone.
- * * Wykrywa błędy takie jak dwa operatory obok siebie (np. "++") lub wyrażenie
- * składające się z samego operatora.
- * * @param tokens Lista tokenów do sprawdzenia.
- * @return true Jeśli operatory są poprawne (lub rzuca wyjątek).
- * @return false Jeśli wyrażenie jest trywialnie błędne (np. sam operator).
+ * @brief Checks whether operators are correctly placed.
+ *
+ * Detects errors such as two consecutive operators (e.g. "++") or an expression
+ * consisting of a single operator.
+ *
+ * @param tokens List of tokens to validate.
+ * @return true If operators are valid (or throws an exception).
+ * @return false If the expression is trivially invalid (e.g. a lone operator).
  */
-bool validateOperators(const std::vector<std::string> &tokens)
+bool validateOperators(const std::vector<std::string>& tokens)
 {
-	std::set<std::string> operators = {"+", "-", "*", "/", "^"};
+	std::set<std::string> operators = { "+", "-", "*", "/", "^" };
 
 	if (operators.count(tokens[0]) && tokens.size() == 1)
 	{
@@ -81,11 +86,11 @@ bool validateOperators(const std::vector<std::string> &tokens)
 	{
 		if (i < tokens.size() - 1)
 		{
-			const auto &current = tokens[i];
-			const auto &next = tokens[i + 1];
+			const auto& current = tokens[i];
+			const auto& next = tokens[i + 1];
 			if (operators.count(current) && operators.count(next))
 			{
-				throw std::runtime_error("Dwa operatory obok siebie.");
+				throw std::runtime_error("Two consecutive operators.");
 			}
 		}
 	}
@@ -94,20 +99,22 @@ bool validateOperators(const std::vector<std::string> &tokens)
 }
 
 /**
- * @brief Weryfikuje poprawność nawiasów w wyrażeniu.
- * * Sprawdza, czy każdy nawias otwierający ma parę oraz czy bilans nawiasów
- * nie schodzi poniżej zera w trakcie analizy.
- * * @param tokens Lista tokenów.
- * @return true Jeśli nawiasy są poprawne.
- * @throws std::runtime_error Jeśli bilans nawiasów jest nieprawidłowy.
+ * @brief Verifies the correctness of parentheses in the expression.
+ *
+ * Checks that every opening parenthesis has a matching closing one and that
+ * the parenthesis balance never drops below zero during analysis.
+ *
+ * @param tokens List of tokens.
+ * @return true If parentheses are valid.
+ * @throws std::runtime_error If the parenthesis balance is invalid.
  */
-bool validateParentheses(const std::vector<std::string> &tokens)
+bool validateParentheses(const std::vector<std::string>& tokens)
 {
 	int balance = 0;
 
 	for (int i = 0; i < tokens.size(); i++)
 	{
-		const auto &token = tokens[i];
+		const auto& token = tokens[i];
 
 		if (token == "(")
 		{
@@ -119,26 +126,28 @@ bool validateParentheses(const std::vector<std::string> &tokens)
 			balance--;
 			if (balance < 0)
 			{
-				throw std::runtime_error("Nieprawidlowe nawiasy w rownaniu.");
+				throw std::runtime_error("Invalid parentheses in equation.");
 			}
 		}
 	}
 	if (balance != 0)
 	{
-		throw std::runtime_error("Niepoprawna liczba nawiasow.");
+		throw std::runtime_error("Incorrect number of parentheses.");
 	}
 
 	return true;
 }
 
 /**
- * @brief Upewnia się, że tokeny zawierają tylko dozwolone znaki.
- * * Waliduje format liczb (w tym ułamków), operatorów oraz nazw zmiennych.
- * * @param tokens Lista tokenów.
- * @return true Jeśli wszystkie znaki są dozwolone.
- * @throws std::runtime_error Jeśli napotkano nieznany symbol.
+ * @brief Ensures that tokens contain only allowed characters.
+ *
+ * Validates the format of numbers (including decimals), operators, and variable names.
+ *
+ * @param tokens List of tokens.
+ * @return true If all characters are allowed.
+ * @throws std::runtime_error If an unknown symbol is encountered.
  */
-bool allowedCharacter(const std::vector<std::string> &tokens)
+bool allowedCharacter(const std::vector<std::string>& tokens)
 {
 
 	std::regex pattern("([-]?[0-9A-Z]+([\\.,][0-9A-Z]+)?|[+\\-*/^()=])|([-]?\\$M[0-9]+)");
@@ -147,41 +156,44 @@ bool allowedCharacter(const std::vector<std::string> &tokens)
 	{
 		if (!std::regex_match(tokens[i], pattern))
 		{
-			throw std::runtime_error("Liczby z niewlasciwego zakresu: " + tokens[i]);
+			throw std::runtime_error("Numbers out of allowed range: " + tokens[i]);
 		}
 	}
 	return true;
 }
 
 /**
- * @brief Sprawdza poprawność struktury przypisania do zmiennej.
- * * Wymaga, aby wyrażenie zaczynało się od poprawnej nazwy zmiennej ($M...)
- * i znaku równości.
- * * @param tokens Lista tokenów.
- * @return true Jeśli struktura jest poprawna.
- * @throws std::runtime_error Jeśli brak zmiennej lub znaku równości na początku.
+ * @brief Validates the structure of a variable assignment.
+ *
+ * Requires the expression to begin with a valid variable name ($M...)
+ * followed by an equals sign.
+ *
+ * @param tokens List of tokens.
+ * @return true If the structure is valid.
+ * @throws std::runtime_error If the variable name or equals sign is missing.
  */
-bool validateVariableName(const std::vector<std::string> &tokens)
+bool validateVariableName(const std::vector<std::string>& tokens)
 {
 	std::regex pattern("\\$M[0-9]+");
 	if (!std::regex_match(tokens[0], pattern))
 	{
-		throw std::runtime_error("Nieprawidlowa nazwa zmiennej.");
+		throw std::runtime_error("Invalid variable name.");
 	}
 
 	if (tokens[1] != "=")
 	{
-		throw std::runtime_error("Brak znaku rownosci na poczatku wyrazenia.");
+		throw std::runtime_error("Missing equals sign at the beginning of the expression.");
 	}
 	return true;
 }
 
 /**
- * @brief Agreguje wszystkie testy walidacyjne.
- * * @param tokens Lista tokenów.
- * @return true Jeśli wyrażenie przeszło wszystkie testy pomyślnie.
+ * @brief Aggregates all validation checks.
+ *
+ * @param tokens List of tokens.
+ * @return true If the expression passed all checks successfully.
  */
-bool validate(const std::vector<std::string> &tokens)
+bool validate(const std::vector<std::string>& tokens)
 {
 	if (validateOperators(tokens) && validateParentheses(tokens) && allowedCharacter(tokens) && validateVariableName(tokens))
 	{
@@ -192,16 +204,18 @@ bool validate(const std::vector<std::string> &tokens)
 
 // Normalization
 /**
- * @brief Normalizuje format wyrażenia.
- * * Zamienia przecinki na kropki w liczbach oraz wstawia domyślne znaki mnożenia
- * (np. przed nawiasami), aby ułatwić późniejsze parsowanie.
- * * @param tokens Referencja do wektora tokenów (modyfikowana w miejscu).
- * @return std::vector<std::string> Znormalizowany wektor tokenów.
+ * @brief Normalizes the format of an expression.
+ *
+ * Replaces commas with dots in numbers and inserts implicit multiplication signs
+ * (e.g. before parentheses) to simplify subsequent parsing.
+ *
+ * @param tokens Reference to the token vector (modified in place).
+ * @return std::vector<std::string> Normalized token vector.
  */
-std::vector<std::string> normalize(std::vector<std::string> &tokens)
+std::vector<std::string> normalize(std::vector<std::string>& tokens)
 {
 	std::vector<std::string> result;
-	std::set<std::string> operators = {"+", "-", "*", "/", "^"};
+	std::set<std::string> operators = { "+", "-", "*", "/", "^" };
 	std::regex fraction("([-]?[0-9A-Z]+([\\.,][0-9A-Z]+)?)");
 
 	int exponential = 0;
@@ -222,8 +236,8 @@ std::vector<std::string> normalize(std::vector<std::string> &tokens)
 
 		if (i < tokens.size() - 1)
 		{
-			auto &current = tokens[i];
-			const auto &next = tokens[i + 1];
+			auto& current = tokens[i];
+			const auto& next = tokens[i + 1];
 
 			if (!operators.count(current) && next == "(" && current != "=" && current != "(")
 			{
@@ -262,11 +276,12 @@ std::vector<std::string> normalize(std::vector<std::string> &tokens)
 
 // Parser
 /**
- * @brief Parsuje tekst wejściowy, wykonując tokenizację i normalizację.
- * * @param input Surowy tekst równania.
- * @return std::optional<std::vector<std::string>> Wektor przygotowanych tokenów lub std::nullopt w przypadku błędu walidacji.
+ * @brief Parses the input text by performing tokenization and normalization.
+ *
+ * @param input Raw equation text.
+ * @return std::optional<std::vector<std::string>> Vector of prepared tokens or std::nullopt on validation error.
  */
-std::optional<std::vector<std::string>> parser(const std::string &input)
+std::optional<std::vector<std::string>> parser(const std::string& input)
 {
 	auto tokens = tokenize(input);
 
@@ -279,15 +294,17 @@ std::optional<std::vector<std::string>> parser(const std::string &input)
 	return normalized_equation;
 }
 
-// ONP
+// RPN
 /**
- * @brief Konwertuje wyrażenie na Odwrotną Notację Polską (ONP).
- * * Wykorzystuje algorytm Shunting-yard do uporządkowania operatorów i operandów
- * zgodnie z kolejnością wykonywania działań.
- * * @param input Równanie w formie tekstu.
- * @return std::optional<std::vector<std::string>> Wyrażenie w formacie ONP lub std::nullopt w razie błędu.
+ * @brief Converts an expression to Reverse Polish Notation (RPN).
+ *
+ * Uses the Shunting-yard algorithm to reorder operators and operands
+ * according to the correct order of operations.
+ *
+ * @param input Equation as a string.
+ * @return std::optional<std::vector<std::string>> Expression in RPN format or std::nullopt on error.
  */
-std::optional<std::vector<std::string>> ONPConversion(const std::string &input)
+std::optional<std::vector<std::string>> ONPConversion(const std::string& input)
 {
 	auto normalized_equation = parser(input);
 	std::vector<std::string> result = {};
@@ -307,7 +324,7 @@ std::optional<std::vector<std::string>> ONPConversion(const std::string &input)
 	};
 
 	auto tokens = normalized_equation.value();
-	for (const auto &token : tokens)
+	for (const auto& token : tokens)
 	{
 		if (!operator_order.count(token) && token != "(" && token != ")")
 		{
@@ -360,8 +377,8 @@ std::optional<std::vector<std::string>> ONPConversion(const std::string &input)
 }
 
 /**
- * @brief Pomocnicza funkcja konwertująca znak na cyfrę.
- * Obsługuje cyfry 0-9 oraz litery A-Z (dla systemów o podstawie > 10).
+ * @brief Helper function that converts a character to a digit.
+ * Handles digits 0-9 and letters A-Z (for bases greater than 10).
  */
 int charToDigit(char c)
 {
@@ -373,8 +390,8 @@ int charToDigit(char c)
 }
 
 /**
- * @brief Pomocnicza funkcja konwertująca cyfrę na znak.
- * Odwrotność charToDigit.
+ * @brief Helper function that converts a digit to a character.
+ * Inverse of charToDigit.
  */
 char digitToChar(int digit)
 {
@@ -386,16 +403,17 @@ char digitToChar(int digit)
 }
 
 /**
- * @brief Konwertuje liczbę zapisaną jako tekst w dowolnym systemie na system dziesiętny.
- * * @param number Liczba w formie tekstu (np. "1A").
- * @param base Podstawa systemu liczbowego (2-36).
- * @return std::string Wynik jako tekst reprezentujący liczbę dziesiętną.
+ * @brief Converts a number given as a string in any base to base 10.
+ *
+ * @param number Number as a string (e.g. "1A").
+ * @param base Base of the number system (2-36).
+ * @return std::string Result as a string representing the decimal number.
  */
-std::string anyToDecimal(const std::string &number, int base)
+std::string anyToDecimal(const std::string& number, int base)
 {
 	if (base > 36 || base <= 1)
 	{
-		throw std::out_of_range("Niepoprawny przedzial podstawy systemu liczbowego(2-36)");
+		throw std::out_of_range("Invalid number base range (2-36).");
 	}
 
 	size_t dot_position = number.find('.');
@@ -409,7 +427,7 @@ std::string anyToDecimal(const std::string &number, int base)
 		int digit = charToDigit(number[i]);
 		if (digit >= base)
 		{
-			throw std::out_of_range("Liczby niezgodne z podanym systemem liczbowym: " + std::to_string(digit));
+			throw std::out_of_range("Digit incompatible with the given number base: " + std::to_string(digit));
 		}
 
 		result += digit * power;
@@ -426,7 +444,7 @@ std::string anyToDecimal(const std::string &number, int base)
 
 			if (digit >= base)
 			{
-				throw std::out_of_range("Liczby niezgodne z podanym systemem liczbowym: " + std::to_string(digit));
+				throw std::out_of_range("Digit incompatible with the given number base: " + std::to_string(digit));
 			}
 
 			result += digit * power;
@@ -437,16 +455,17 @@ std::string anyToDecimal(const std::string &number, int base)
 }
 
 /**
- * @brief Konwertuje liczbę dziesiętną (double) na tekst w docelowym systemie liczbowym.
- * * @param number Liczba dziesiętna.
- * @param base Docelowa podstawa systemu (2-36).
- * @return std::string Reprezentacja liczby w nowym systemie.
+ * @brief Converts a decimal number (double) to a string in the target number base.
+ *
+ * @param number Decimal number.
+ * @param base Target base (2-36).
+ * @return std::string Representation of the number in the new base.
  */
 std::string decimalToAny(double number, int base)
 {
 	if (base > 36 || base < 2)
 	{
-		throw std::out_of_range("Niepoprawny przedzial podstawy systemu liczbowego (2-36)");
+		throw std::out_of_range("Invalid number base range (2-36).");
 	}
 
 	if (base == 10)
@@ -505,14 +524,16 @@ std::string decimalToAny(double number, int base)
 }
 
 /**
- * @brief Przechodzi przez wektor ONP i konwertuje wszystkie liczby na system dziesiętny.
- * * Jest to krok niezbędny przed wykonaniem obliczeń, ponieważ logika matematyczna
- * operuje na typie double (system dziesiętny).
- * * @param onp_equation Wektor tokenów w ONP.
- * @param base Podstawa systemu, w jakim zapisane są liczby w tokenach.
- * @return std::vector<std::string> Wektor tokenów z liczbami dziesiętnymi.
+ * @brief Iterates over an RPN vector and converts all numbers to base 10.
+ *
+ * This step is required before performing calculations, since the mathematical
+ * logic operates on the double type (base 10).
+ *
+ * @param onp_equation Vector of RPN tokens.
+ * @param base The base in which the numbers in the tokens are written.
+ * @return std::vector<std::string> Token vector with decimal numbers.
  */
-std::vector<std::string> anyToDecimalConversion(const std::vector<std::string> &onp_equation, const int &base)
+std::vector<std::string> anyToDecimalConversion(const std::vector<std::string>& onp_equation, const int& base)
 {
 	if (base == 10)
 	{
@@ -521,7 +542,7 @@ std::vector<std::string> anyToDecimalConversion(const std::vector<std::string> &
 
 	std::vector<std::string> result = {};
 
-	for (const auto &token : onp_equation)
+	for (const auto& token : onp_equation)
 	{
 		if (token == "+" || token == "-" || token == "*" || token == "/" || token == "^")
 		{
@@ -542,14 +563,15 @@ std::vector<std::string> anyToDecimalConversion(const std::vector<std::string> &
 
 // Simple Calculations
 /**
- * @brief Wykonuje pojedynczą operację arytmetyczną.
- * * @param number_a Pierwszy operand.
- * @param number_b Drugi operand.
- * @param symbol Operator działania (+, -, *, /, ^).
- * @return double Wynik działania.
- * @throws std::runtime_error W przypadku błędu (np. dzielenie przez zero).
+ * @brief Performs a single arithmetic operation.
+ *
+ * @param number_a First operand.
+ * @param number_b Second operand.
+ * @param symbol Arithmetic operator (+, -, *, /, ^).
+ * @return double Result of the operation.
+ * @throws std::runtime_error On error (e.g. division by zero).
  */
-double operations(const double &number_a, const double &number_b, const std::string &symbol)
+double operations(const double& number_a, const double& number_b, const std::string& symbol)
 {
 	double result{};
 	char symbol_char = symbol[0];
@@ -569,7 +591,7 @@ double operations(const double &number_a, const double &number_b, const std::str
 	case '/':
 		if (number_b == 0)
 		{
-			throw std::runtime_error("Dzielenie przez zero");
+			throw std::runtime_error("Division by zero.");
 		}
 		result = number_a / number_b;
 		break;
@@ -577,7 +599,7 @@ double operations(const double &number_a, const double &number_b, const std::str
 		result = std::pow(number_a, number_b);
 		break;
 	default:
-		throw std::runtime_error("Nieznany operator: " + symbol);
+		throw std::runtime_error("Unknown operator: " + symbol);
 	}
 	return result;
 }
@@ -589,26 +611,28 @@ struct Variable
 	double variable_value;
 };
 
-// ONPCalc
+// RPNCalc
 /**
- * @brief Oblicza wartość wyrażenia zapisanego w ONP.
- * * Przechodzi przez tokeny, odkładając liczby na stos i zdejmując je
- * w momencie napotkania operatora. Podstawia też wartości zmiennych z mapy.
- * * @param input Wektor tokenów ONP.
- * @param values Mapa zmiennych.
- * @return double Wynik obliczeń.
+ * @brief Evaluates an expression written in RPN.
+ *
+ * Iterates through the tokens, pushing numbers onto a stack and popping them
+ * when an operator is encountered. Also substitutes variable values from the map.
+ *
+ * @param input Vector of RPN tokens.
+ * @param values Variable map.
+ * @return double Calculation result.
  */
-double ONPCalc(const std::vector<std::string> &input, std::unordered_map<std::string, double> &values)
+double ONPCalc(const std::vector<std::string>& input, std::unordered_map<std::string, double>& values)
 {
 	std::vector<double> stack;
 
-	for (const auto &token : input)
+	for (const auto& token : input)
 	{
 		if (token == "+" || token == "-" || token == "*" || token == "/" || token == "^")
 		{
 			if (stack.size() < 2)
 			{
-				throw std::runtime_error("Nieprawidlowe wyrazenie ONP - brak operandow dla operatora: " + token);
+				throw std::runtime_error("Invalid RPN expression - missing operands for operator: " + token);
 			}
 
 			double b = stack.back();
@@ -637,7 +661,7 @@ double ONPCalc(const std::vector<std::string> &input, std::unordered_map<std::st
 				}
 				else
 				{
-					throw std::invalid_argument("Nie podano zmiennej: " + token);
+					throw std::invalid_argument("Undefined variable: " + token);
 				}
 			}
 			else
@@ -646,9 +670,9 @@ double ONPCalc(const std::vector<std::string> &input, std::unordered_map<std::st
 				{
 					stack.push_back(std::stod(token));
 				}
-				catch (const std::invalid_argument &error)
+				catch (const std::invalid_argument& error)
 				{
-					throw std::invalid_argument("Nie mozna przekonwertowac na liczbe(niepoprawny zapis): " + token);
+					throw std::invalid_argument("Cannot convert to number (invalid format): " + token);
 				}
 			}
 		}
@@ -656,25 +680,27 @@ double ONPCalc(const std::vector<std::string> &input, std::unordered_map<std::st
 
 	if (stack.empty())
 	{
-		throw std::runtime_error("Pusty stos po obliczeniach");
+		throw std::runtime_error("Empty stack after calculations.");
 	}
 	if (stack.size() > 1)
 	{
-		throw std::runtime_error("Nieprawidlowe ONP");
+		throw std::runtime_error("Invalid RPN expression.");
 	}
 
 	return stack[0];
 }
 
 /**
- * @brief Usuwa zbędne zera końcowe oraz ewentualną kropkę dziesiętną.
- * * Funkcja służy do poprawy estetyki wyświetlania liczb zmiennoprzecinkowych.
- * Redukuje ciągi typu "2.500000" do "2.5", a liczby całkowite zapisane z kropką
- * (np. "12.000000") skracane są do formy całkowitej ("12").
- * * @param number Liczba w formacie tekstowym (zazwyczaj wynik std::to_string).
- * @return std::string Liczba bez nadmiarowych zer i kropki na końcu.
+ * @brief Removes trailing zeros and an optional trailing decimal point.
+ *
+ * Used to improve the display of floating-point numbers.
+ * Reduces strings like "2.500000" to "2.5", and integers written with a decimal point
+ * (e.g. "12.000000") are shortened to their integer form ("12").
+ *
+ * @param number Number as a string (typically the result of std::to_string).
+ * @return std::string Number without redundant zeros or a trailing decimal point.
  */
-std::string cutZeros(const std::string &number)
+std::string cutZeros(const std::string& number)
 {
 	std::string result = number;
 	size_t pos = number.find_last_not_of('0');
@@ -689,7 +715,7 @@ std::string cutZeros(const std::string &number)
 	return result;
 }
 
-std::optional<Variable> Calc(const std::string &input, std::unordered_map<std::string, double> &values, const int &base_input, const int &base_output)
+std::optional<Variable> Calc(const std::string& input, std::unordered_map<std::string, double>& values, const int& base_input, const int& base_output)
 {
 	auto onp_equation = ONPConversion(input);
 	auto map_of_values = values;
@@ -707,7 +733,7 @@ std::optional<Variable> Calc(const std::string &input, std::unordered_map<std::s
 		onp_equation_for_calculations = anyToDecimalConversion(onp_equation_for_calculations, base_input);
 	}
 
-	Variable var = {"", "", 0};
+	Variable var = { "", "", 0 };
 
 	std::vector<std::string> onp_equation_variable_part(onp_equation_vector.begin(), onp_equation_vector.begin() + 1);
 

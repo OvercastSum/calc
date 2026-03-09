@@ -1,6 +1,6 @@
 /**
  * @file file_handling.cpp
- * @brief Implementacja funkcji odpowiedzialnych za operacje wejścia/wyjścia na plikach.
+ * @brief Implementation of functions responsible for file input/output operations.
  */
 #include <iostream>
 #include <vector>
