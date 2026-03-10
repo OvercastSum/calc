@@ -24,7 +24,7 @@ calculator -i ../examples/input.txt -o ../examples/output.txt -s 10 -S 10
 ### Input file format
 Variable start with `$M` followed by a number:
 <br /> $M5 = 2+2
-<br /> $M3 = $M / 73
+<br /> $M3 = $M5 / 73
 
 ### Flags
 | Flag | Description |
